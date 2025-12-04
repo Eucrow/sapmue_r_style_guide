@@ -247,7 +247,7 @@ detect_false_mt1 <- function(catches) {
 3. `@return`
 4. `@details` (if applicable)
 5. `@note` (check code first, then other notes; if applicable)
-6. `@examples` (generally avoided in this project)
+6. `@examples`
 
 ---
 
