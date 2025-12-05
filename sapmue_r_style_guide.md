@@ -4,6 +4,8 @@ Version 1.0
 
 This style guide documents the coding conventions used by the Sampling Data Quality Assurance Team for the SAP project (Spanish Institute of Oceanography). Following these guidelines ensures consistency and maintainability across the codebase.
 
+Idioma: English | [Español](./sapmue_r_style_guide_sp.md)
+
 ---
 
 ## **Table of Contents**
@@ -43,13 +45,10 @@ This style guide documents the coding conventions used by the Sampling Data Qual
   - [**11. File Paths**](#11-file-paths)
     - [**11.1 Path Construction**](#111-path-construction)
     - [**11.2 Path Variables**](#112-path-variables)
-  - [**12. Function Structure**](#12-function-structure)
-    - [**12.1 Check Functions Pattern**](#121-check-functions-pattern)
-    - [**12.2 Helper Functions Pattern**](#122-helper-functions-pattern)
-  - [**13. Anti-Patterns (What to Avoid)**](#13-anti-patterns-what-to-avoid)
-    - [**13.1 Don't Mix Naming Conventions**](#131-dont-mix-naming-conventions)
-    - [**13.2 Don't Modify Global Variables Inside Functions**](#132-dont-modify-global-variables-inside-functions)
-    - [**13.3 Don't Use Hardcoded Paths**](#133-dont-use-hardcoded-paths)
+  - [**12. Anti-Patterns (What to Avoid)**](#12-anti-patterns-what-to-avoid)
+    - [**12.1 Don't Mix Naming Conventions**](#121-dont-mix-naming-conventions)
+    - [**12.2 Don't Modify Global Variables Inside Functions**](#122-dont-modify-global-variables-inside-functions)
+    - [**12.3 Don't Use Hardcoded Paths**](#123-dont-use-hardcoded-paths)
 
 ---
 
@@ -69,7 +68,7 @@ It is highly recommended to use this structure when possible:
 project_name/
 ├── R/                    # R functions and scripts
 ├── data/                 # Generated/processed data
-├── data-raw/             # Reference data (CSV, Excel files)
+├── data-raw/             # Reference data (CSV, Excel files...)
 ├── private/              # Sensitive information (credentials, contacts)
 └── main_script.R         # Main execution script(s) - one or more
 ```
@@ -80,7 +79,6 @@ project_name/
   - Use subfolders to organize functions by category (e.g., `errors_functions/`, `helpers/`)
 - **data/** - Stores generated or processed data organized by year/month or analysis. **Important:** Add `data/` to `.gitignore` if it contains large files or sensitive information
 - **data-raw/** - Read-only reference data (species lists, lookup tables, etc.)
-  - Commit small reference files to version control
   - Add to `.gitignore` if files are large or contain sensitive information
 - **private/** - Sensitive information that should NOT be committed to version control. **Important:** Always add `private/` to `.gitignore`
 
@@ -141,6 +139,7 @@ Use the following section order whenever feasible:
 - Avoid abbreviations unless they are widely understood (e.g., `ID`, `URL`)
 - Prefer longer, clear names over short, cryptic ones
 - Names should be self-documenting - a reader should understand what the variable contains without additional comments
+- Avoid special characters (except underscores)
 
 ```r
 # ✓ Good - descriptive names
@@ -182,7 +181,7 @@ export_errors_list <- function(errors_list, filename) { }
 
 ### **4.3 Data Frame Columns**
 ```r
-# Uppercase with underscores (database convention)
+# Uppercase with underscores
 COD_ID
 COD_PUERTO
 FECHA_MUE
@@ -365,7 +364,7 @@ if (condition1 &&
 
 ### **7.2 Return Statements**
 ```r
-# Explicit NULL returns for consistency
+# Explicit returns for consistency, including NULL
 if (nrow(errors) > 0) {
   return(errors)
 }
@@ -390,29 +389,34 @@ if (nrow(errors) > 0) {
 ```
 
 **Inline Comments:**
+- Single space after hash
 ```r
-# Single space after hash
+# ✓ Good
 x <- 5  # Brief explanation
 
 # ✗ Avoid
-#No space
 x <- 5 #no space before
 ```
 
 **TODO Comments:**
+- Space after the hash
+- Text “TODO:”
+- Space after the colon
+- Sentence that describes the task
 ```r
-# Pattern: # TODO: Description in sentence case
 # TODO: Create a coherence check for rim_stratum-origin
 # TODO: Find a better way to handle this case
 
 # ✗ Avoid
-##TODO: all caps description
+# TODO: ALL CAPS TASK
 # todo: lowercase start
 ```
 
 ### **8.2 Commented Code**
+- Keep alternatives commented with explanation
+- Remove unexplaunexplained commented code or useless or dedundant commented code
 ```r
-# Keep alternatives commented with explanation
+# ✓ Good
 # errors <- rim_check_annual(muestreos_up)  # Annual check alternative
 # errors <- oab_check(muestreos_up)         # OAB check alternative
 
@@ -470,8 +474,8 @@ library(sapmuebase)
 
 ### **10.2 Package Installation Comments**
 When a package is not available on CRAN:
+- Keep installation instructions or installation code commented
 ```r
-# Keep installation instructions commented
 # Install sapmuebase from GitHub
 # install_github("eucrow/sapmuebase")
 ```
@@ -481,12 +485,14 @@ When a package is not available on CRAN:
 ## **11. File Paths**
 
 ### **11.1 Path Construction**
+- Always use file.path() for cross-platform compatibility
+- Avoid string concatenation
 ```r
-# Always use file.path() for cross-platform compatibility
+# ✓ Good
 PATH_FILES <- file.path(getwd(), "data", YEAR, IDENTIFIER)
 PATH_ERRORS <- file.path(PATH_FILES, ERRORS_FOLDER_NAME)
 
-# ✗ Avoid string concatenation
+# ✗ Bad
 PATH_FILES <- paste0(getwd(), "/data/", YEAR, "/", IDENTIFIER)
 ```
 
@@ -500,60 +506,9 @@ PATH_DATA_RAW <- file.path(getwd(), DATA_RAW_FOLDER_NAME)
 
 ---
 
-## **12. Function Structure**
+## **12. Anti-Patterns (What to Avoid)**
 
-### **12.1 Check Functions Pattern**
-```r
-#' Check function for data quality
-#'
-#' @description
-#' Performs checks on the input data to ensure quality and consistency.
-#'
-#' @param input_data Data frame. The data to be checked.
-#'
-#' @return Data frame with errors added, or NULL if no errors found.
-#'
-#' @details
-#' This function checks for missing values, duplicates, and other common data
-#' quality issues. It is intended to be used as a first step in the data
-#' processing pipeline.
-#'
-#' @note Check code: 1001
-#'
-check_data_quality <- function(input_data) {
-  # Implementation
-}
-```
-
-### **12.2 Helper Functions Pattern**
-```r
-#' Helper function to calculate derived values
-#'
-#' @description
-#' Calculates values that are derived from the main data columns, such as
-#' growth rates or age from length.
-#'
-#' @param length_column Numeric vector. The column with length measurements.
-#' @param growth_coefficient Numeric. The growth coefficient for the calculation.
-#'
-#' @return Numeric vector with the calculated values.
-#'
-#' @details
-#' This is a helper function used by the main analysis functions. It should
-#' generally not be called directly by the user.
-#'
-#' @note Internal use only
-#'
-calculate_growth_rate <- function(length_column, growth_coefficient) {
-  # Implementation
-}
-```
-
----
-
-## **13. Anti-Patterns (What to Avoid)**
-
-### **13.1 Don't Mix Naming Conventions**
+### **12.1 Don't Mix Naming Conventions**
 ```r
 # ✗ Bad
 myVariable <- 5
@@ -566,7 +521,7 @@ another_variable <- 10
 yet_another_variable <- 15
 ```
 
-### **13.2 Don't Modify Global Variables Inside Functions**
+### **12.2 Don't Modify Global Variables Inside Functions**
 ```r
 # ✗ Bad
 check_function <- function(data) {
@@ -581,7 +536,7 @@ check_function <- function(data) {
 }
 ```
 
-### **13.3 Don't Use Hardcoded Paths**
+### **12.3 Don't Use Hardcoded Paths**
 ```r
 # ✗ Bad
 data <- read.csv("C:/Users/Marco/data/file.csv")
